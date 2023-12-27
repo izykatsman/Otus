@@ -1,0 +1,125 @@
+CREATE TABLE IF NOT EXISTS balance_type(
+id SERIAL NOT NULL,
+text_aliace VARCHAR(3) NOT NULL,
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS client(
+id BIGINT NOT NULL UNIQUE,
+username VARCHAR(100) NOT NULL,
+name VARCHAR(100) NULL,
+sername VARCHAR(100) NULL,
+end_of_subscription BIGINT NOT NULL DEFAULT 0,
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS balance_history(
+id SERIAL NOT NULL,
+sum_value INT NOT NULL DEFAULT 0 CHECK(sum_value > 0),
+account_balance INT NOT NULL DEFAULT 0 CHECK(sum_value > 0),
+balance_type_id INT NOT NULL,
+client_id BIGINT NOT NULL,
+FOREIGN KEY(balance_type_id) REFERENCES balance_type(id),
+FOREIGN KEY(client_id) REFERENCES client(id),
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS bot(
+id BIGINT NOT NULL UNIQUE,
+phone BIGINT NOT NULL UNIQUE,
+name VARCHAR(100) NULL,
+sername VARCHAR(100) NULL,
+proxy_login VARCHAR(100) NOT NULL,
+proxy_password VARCHAR(100) NOT NULL,
+proxy_port INT NOT NULL,
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS bot_in_client(
+id BIGSERIAL NOT NULL,
+bot_id BIGINT NOT NULL,
+client_id BIGINT NOT NULL,
+FOREIGN KEY(bot_id) REFERENCES bot(id),
+FOREIGN KEY(client_id) REFERENCES client(id),
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS chat(
+id BIGINT NOT NULL UNIQUE,
+username VARCHAR(100) NOT NULL,
+name VARCHAR(100) NOT NULL,
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS bot_in_chat(
+id BISERIAL NOT NULL,
+bot_id BIGINT NOT NULL,
+chat_id BIGINT NOT NULL,
+FOREIGN KEY(bot_id) REFERENCES bot(id),
+FOREIGN KEY(chat_id) REFERENCES chat(id),
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS message(
+id BIGSERIAL NOT NULL,
+current_text_id INT NOT NULL,
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS text(
+id BIGSERIAL NOT NULL,
+text VARCHAR(2048) NOT NULL,
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS file(
+id BIGSERIAL NOT NULL,
+file_path VARCHAR(100),
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS text_message(
+id BIGSERIAL NOT NULL,
+text_id BIGINT NOT NULL,
+message_id BIGINT NOT NULL,
+FOREIGN KEY(text_id) REFERENCES text(id),
+FOREIGN KEY(message_id) REFERENCES message(id),
+PRIMARY KEY(id)
+);
+
+
+CREATE TABLE IF NOT EXISTS file_message(
+id BIGSERIAL NOT NULL,
+file_id BIGINT NOT NULL,
+message_id BIGINT NOT NULL,
+FOREIGN KEY(file_id) REFERENCES file(id),
+FOREIGN KEY(message_id) REFERENCES message(id),
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS scheduler(
+id BIGSERIAL NOT NULL,
+message_id BIGINT NOT NULL,
+bot_in_chat_id BIGINT NOT NULL,
+send_date BIGINT NOT NULL,
+FOREIGN KEY(message_id) REFERENCES message(id),
+FOREIGN KEY(bot_in_chat_id) REFERENCES bot_in_chat(id),
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS task_time(
+id SERIAL NOT NULL,
+day_of_week VARCHAR(9) NOT NULL,
+hour INT NOT NULL,
+minute INT NOT NULL,
+PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS calendar(
+id BIGSERIAL NOT NULL,
+is_repyt INT(1) NOT NULL,
+bot_in_chat_id BIGINT NOT NULL,
+task_time_id INT NOT NULL,
+FOREIGN KEY(bot_in_chat_id) REFERENCES bot_in_chat(id),
+FOREIGN KEY(task_time_id) REFERENCES task_time(id),
+PRIMARY KEY(id)
